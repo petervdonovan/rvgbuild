@@ -1,4 +1,3 @@
-pub mod goal;
 pub mod args;
 pub mod buildfile;
 pub mod execute;
