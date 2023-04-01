@@ -1,26 +1,27 @@
-use std::path::Path;
+use std::path::{PathBuf};
 
 use clap::Parser;
 use super::goal::Goal;
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 pub struct Args {
     #[arg(short, long, default_value="execution")]
     pub goal: Goal,
-    #[arg(short, long, default_value="./rvgbuild")]
-    build_file: String,
-    file_name: Option<String>,
+    #[arg(short, long, value_parser = parse_file_name, default_value="./rvgbuild")]
+    pub build_file: PathBuf,
+    #[arg(value_parser = optional_parse_file_name, default_value=None)]
+    pub file_name: Option<PathBuf>,
 }
 
-impl Args {
-    fn build_file(&self) -> &Path {
-        Path::new(&self.build_file)
+fn parse_file_name(s: &str) -> Result<PathBuf, std::io::Error> {
+    let p = PathBuf::from(s);
+    if p.exists() {
+        Ok(p)
+    } else {
+        Err(std::io::Error::new(std::io::ErrorKind::NotFound, format!("{s} not found")))
     }
-    fn file_name(&self) -> &Path {
-        match &self.file_name {
-            Some(p) => Path::new(p),
-            None => Path::new(".")
-        }
+}
 
-    }
+fn optional_parse_file_name(s: &str) -> Result<Option<PathBuf>, std::io::Error> {
+    if s == "" { Ok(None) } else { Ok(Some(parse_file_name(s)?)) }
 }
