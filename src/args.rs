@@ -15,12 +15,13 @@ pub struct Args {
 pub struct CommonArgs {
     #[arg(short, long, value_parser = parse_file_name)]
     build_file: Option<PathBuf>,
-    #[arg(value_parser = optional_parse_file_name, default_value=None)]
+    #[arg(value_parser = parse_file_name, default_value=None)]
     pub file_name: Option<PathBuf>,
 }
 
 impl CommonArgs {
     pub fn build_file<'a>(&mut self) -> & PathBuf {
+        println!("build file is {:?}", self.build_file);
         match self.build_file {
             Some(ref p) => &p,
             None => {
@@ -95,6 +96,6 @@ fn parse_file_name(s: &str) -> Result<PathBuf, std::io::Error> {
     }
 }
 
-fn optional_parse_file_name(s: &str) -> Result<Option<PathBuf>, std::io::Error> {
-    if s == "" { Ok(None) } else { Ok(Some(parse_file_name(s)?)) }
-}
+// fn optional_parse_file_name(s: &str) -> Result<PathBuf, std::io::Error> {
+//     if s == "" { Ok(None) } else { Ok(Some(parse_file_name(s)?)) }
+// }
