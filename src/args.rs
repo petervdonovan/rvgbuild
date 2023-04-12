@@ -21,7 +21,6 @@ pub struct CommonArgs {
 
 impl CommonArgs {
   pub fn build_file<'a>(&mut self) -> &PathBuf {
-    println!("build file is {:?}", self.build_file);
     match self.build_file {
       Some(ref p) => &p,
       None => {

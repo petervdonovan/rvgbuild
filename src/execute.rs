@@ -1,5 +1,6 @@
 use std::fmt::Write;
 use std::fs;
+use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Stdio;
@@ -19,7 +20,7 @@ fn get_applier_rec(files: &[PathBuf], result: &mut String) {
     get_applier_rec(&files[1..], result);
     result.push_str(" ]]");
   } else if files.len() == 1 {
-    result.push_str(unsafe_file_stem!(files[0]));
+    write!(result, "[{}]", unsafe_file_stem!(files[0])).unwrap();
   }
 }
 fn get_applier(files: &[PathBuf]) -> String {
@@ -28,12 +29,10 @@ fn get_applier(files: &[PathBuf]) -> String {
   get_applier_rec(files, &mut result);
   result
 }
-fn send_to_file(child: std::process::Child, ll: Vec<PathBuf>) {
+fn send_to_file(child: std::process::Child, root: &Path, ll: Vec<PathBuf>) {
   // fs::create_dir_all("src-gen").expect("Failed to create src-gen directory.");
   let last = &ll[ll.len() - 1];
-  let output_file = last
-    .parent()
-    .expect("Expected a file, not a root or empty path")
+  let output_file = root
     .join("src-gen")
     .join(
       String::from(
@@ -77,7 +76,7 @@ pub fn execute(mut args: args::Args) -> Result<(), std::io::Error> {
       .args(args_s)
       .spawn();
     if args.goal.is_none() {
-      send_to_file(child.expect("Failed to start child process"), ll);
+      send_to_file(child.expect("Failed to start child process"), args.build_file().parent().expect("Project root should have a parent directory"), ll);
     }
   }
   Ok(())
