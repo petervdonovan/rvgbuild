@@ -15,6 +15,8 @@ pub struct Args {
 pub struct CommonArgs {
   #[arg(short, long, value_parser = parse_file_name)]
   build_file: Option<PathBuf>,
+  #[arg(short, long)]
+  pub dry_run: bool,
   #[arg(value_parser = parse_file_name, default_value=None)]
   pub file_name: Option<PathBuf>,
 }
@@ -52,6 +54,15 @@ impl Args {
       Some(ref mut g) => g.build_file(),
       None => self.args.build_file(),
     }
+  }
+  pub fn file_name(&mut self) -> &Option<PathBuf> {
+    match &mut self.goal {
+      Some(ref mut g) => g.file_name(),
+      None => &self.args.file_name,
+    }
+  }
+  pub fn dry_run(&self) -> bool {
+    self.args.dry_run
   }
 }
 
@@ -101,7 +112,3 @@ fn parse_file_name(s: &str) -> Result<PathBuf, std::io::Error> {
     ))
   }
 }
-
-// fn optional_parse_file_name(s: &str) -> Result<PathBuf, std::io::Error> {
-//     if s == "" { Ok(None) } else { Ok(Some(parse_file_name(s)?)) }
-// }

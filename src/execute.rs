@@ -58,8 +58,8 @@ fn send_to_file(child: std::process::Child, root: &Path, ll: Vec<PathBuf>) {
   .expect("Failed to write to file");
 }
 
-pub fn execute(mut args: args::Args) -> Result<(), std::io::Error> {
-  let targets = buildfile::targets(&args.build_file())?;
+pub fn execute(args: &mut args::Args) -> Result<(), std::io::Error> {
+  let targets = buildfile::targets(args)?;
   for line in targets {
     let mut args_s = Vec::new();
     match args.goal {
@@ -72,11 +72,13 @@ pub fn execute(mut args: args::Args) -> Result<(), std::io::Error> {
     }
     args_s.push(get_applier(&ll));
     let child = Command::new("rvg")
-      .stdout(Stdio::piped())
+      .stdout(if !args.dry_run() { Stdio::piped() } else { Stdio::inherit() })
       .args(args_s)
       .spawn();
     if args.goal.is_none() {
-      send_to_file(child.expect("Failed to start child process"), args.build_file().parent().expect("Project root should have a parent directory"), ll);
+      if !args.dry_run() {
+        send_to_file(child.expect("Failed to start child process"), args.build_file().parent().expect("Project root should have a parent directory"), ll);
+      }
     }
   }
   Ok(())
