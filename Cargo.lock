@@ -204,6 +204,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "rbu"
+version = "0.1.0"
+dependencies = [
+ "clap",
+]
+
+[[package]]
 name = "rustix"
 version = "0.37.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -215,13 +222,6 @@ dependencies = [
  "libc",
  "linux-raw-sys",
  "windows-sys",
-]
-
-[[package]]
-name = "rvgbuild"
-version = "0.1.0"
-dependencies = [
- "clap",
 ]
 
 [[package]]

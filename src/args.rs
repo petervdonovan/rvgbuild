@@ -26,7 +26,7 @@ impl CommonArgs {
     match self.build_file {
       Some(ref p) => &p,
       None => {
-        self.build_file = Some(PathBuf::from("./rvgbuild"));
+        self.build_file = Some(PathBuf::from("./build.rbu"));
         self.build_file()
       }
     }
