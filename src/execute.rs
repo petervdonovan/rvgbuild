@@ -91,19 +91,17 @@ pub fn execute(args: &mut args::Args) -> Result<(), std::io::Error> {
       })
       .args(args_s)
       .spawn();
-    if args.goal.is_none() {
-      if !args.dry_run() {
-        send_to_file(
-          child.expect("Failed to start child process"),
-          args
-            .build_file()
-            .parent()
-            .expect("Project root should have a parent directory"),
-          ll,
-        );
-      } else {
-        child?.wait().expect("Failed to spawn child");
-      }
+    if args.goal.is_none() && !args.dry_run() {
+      send_to_file(
+        child.expect("Failed to start child process"),
+        args
+          .build_file()
+          .parent()
+          .expect("Project root should have a parent directory"),
+        ll,
+      );
+    } else {
+      child?.wait().expect("Failed to spawn child");
     }
   }
   Ok(())
