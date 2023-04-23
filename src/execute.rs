@@ -32,16 +32,14 @@ fn get_applier(files: &[PathBuf]) -> String {
 fn send_to_file(child: std::process::Child, root: &Path, ll: Vec<PathBuf>) {
   // fs::create_dir_all("src-gen").expect("Failed to create src-gen directory.");
   let last = &ll[ll.len() - 1];
-  let output_file = root
-    .join("src-gen")
-    .join(
-      String::from(
-        last
-          .file_stem()
-          .expect("Expected file name")
-          .to_string_lossy(),
-      ) + ".s",
-    );
+  let output_file = root.join("src-gen").join(
+    String::from(
+      last
+        .file_stem()
+        .expect("Expected file name")
+        .to_string_lossy(),
+    ) + ".s",
+  );
   fs::create_dir_all(
     output_file
       .parent()
@@ -60,6 +58,9 @@ fn send_to_file(child: std::process::Child, root: &Path, ll: Vec<PathBuf>) {
 
 pub fn execute(args: &mut args::Args) -> Result<(), std::io::Error> {
   let targets = buildfile::targets(args)?;
+  if targets.len() == 0 {
+    panic!("did not find any matching build targets");
+  }
   for line in targets {
     let mut args_s = Vec::new();
     match args.goal {
@@ -67,6 +68,15 @@ pub fn execute(args: &mut args::Args) -> Result<(), std::io::Error> {
       None => (),
     }
     let ll = line?;
+    match args.goal {
+      Some(args::Goal::Hover(_) | args::Goal::Definition(_)) => {
+        args_s.push(match args.file_name() {
+          Some(f) => f.to_string_lossy().to_string(),
+          None => ll[ll.len() - 1].to_string_lossy().to_string(),
+        })
+      }
+      _ => (),
+    }
     for i in 0..ll.len() {
       args_s.push(String::from(ll[i].to_str().unwrap()));
     }
@@ -74,12 +84,23 @@ pub fn execute(args: &mut args::Args) -> Result<(), std::io::Error> {
       args_s.push(get_applier(&ll));
     }
     let child = Command::new("rvg")
-      .stdout(if !args.dry_run() { Stdio::piped() } else { Stdio::inherit() })
+      .stdout(if !args.dry_run() {
+        Stdio::piped()
+      } else {
+        Stdio::inherit()
+      })
       .args(args_s)
       .spawn();
     if args.goal.is_none() {
       if !args.dry_run() {
-        send_to_file(child.expect("Failed to start child process"), args.build_file().parent().expect("Project root should have a parent directory"), ll);
+        send_to_file(
+          child.expect("Failed to start child process"),
+          args
+            .build_file()
+            .parent()
+            .expect("Project root should have a parent directory"),
+          ll,
+        );
       } else {
         child?.wait().expect("Failed to spawn child");
       }
