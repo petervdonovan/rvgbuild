@@ -17,6 +17,8 @@ pub struct CommonArgs {
   build_file: Option<PathBuf>,
   #[arg(short, long)]
   pub dry_run: bool,
+  #[arg(short, long)]
+  pub no_applier: bool,
   #[arg(value_parser = parse_file_name, default_value=None)]
   pub file_name: Option<PathBuf>,
 }
@@ -63,6 +65,9 @@ impl Args {
   }
   pub fn dry_run(&self) -> bool {
     self.args.dry_run
+  }
+  pub fn no_applier(&self) -> bool {
+    self.args.no_applier
   }
 }
 

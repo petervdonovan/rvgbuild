@@ -70,7 +70,9 @@ pub fn execute(args: &mut args::Args) -> Result<(), std::io::Error> {
     for i in 0..ll.len() {
       args_s.push(String::from(ll[i].to_str().unwrap()));
     }
-    args_s.push(get_applier(&ll));
+    if !args.no_applier() {
+      args_s.push(get_applier(&ll));
+    }
     let child = Command::new("rvg")
       .stdout(if !args.dry_run() { Stdio::piped() } else { Stdio::inherit() })
       .args(args_s)
